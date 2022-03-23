@@ -1,0 +1,55 @@
+data<-read.table("~/Desktop/_retailnz.txt",header = T)
+rec = data[,2]
+plot(rec)
+ln.rec= log(rec+1)
+ln = ts(ln.rec, frequency = 6, start = c(1974,1)) plot(ln)
+acf(ln)
+#non stationary
+# Is there a unit root in phi(B)?
+# to check for unit root, we use the fUnitRoots package in R library(fUnitRoots)
+adfTest(ln, lags = 12)
+# Large p-value, so fail to reject H_0.
+# Yes, there is a unit root in phi(B).
+# what to do when there is a unit root?
+# taking difference
+d.rec = diff(ln)
+head(cbind(ln, d.rec))
+# check if the difference process is stationary
+par(mfrow = c(2,1))
+plot(d.rec)
+acf(d.rec)
+## the difference process seems to be stationary
+## so now we try to fit an ARMA(p,q) on the difference
+par(mfrow = c(2,1))
+acf(d.rec)
+pacf(d.rec)
+## p = 2 and q = 2
+m1 = arima(d.rec, order = c(0,0,2), include.mean = F)
+m1
+tsdiag(m1)  # not acceptable b/c res are not white-noise
+
+m2 = arima(d.rec, order = c(1,0,2), include.mean = F)
+m2
+tsdiag(m2) # still not acceptable
+m3 = arima(d.rec, order = c(0,0,2), include.mean = F)
+m3
+tsdiag(m3)
+m4 = arima(d.rec, order = c(1,0,1), include.mean = F)
+m4
+tsdiag(m4)
+m5 = arima(d.rec, order = c(0,0,1), include.mean = F)
+m5
+tsdiag(m5)
+m7 = arima(d.rec, order = c(2,0,2), include.mean = F)
+m7
+tsdiag(m7)
+m8 = arima(d.rec, order = c(2,0,0), include.mean = F)
+m8
+tsdiag(m8)
+m9 = arima(d.rec, order = c(11,0,3), include.mean = F)
+m9
+tsdiag(m9)
+## OR
+m = arima(ln.rec, order = c(11,1,3))
+m
+tsdiag(m)
